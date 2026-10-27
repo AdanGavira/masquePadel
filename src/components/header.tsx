@@ -1,0 +1,22 @@
+import { backend } from "@/lib/data";
+import { getDictionary, href, type Locale } from "@/lib/i18n";
+import { HeaderNav } from "./header-nav";
+
+export async function Header({ locale }: { locale: Locale }) {
+  const dict = getDictionary(locale);
+  const user = await backend.getCurrentUser();
+
+  return (
+    <HeaderNav
+      locale={locale}
+      dict={dict.nav}
+      user={user ? { name: user.name, isAdmin: user.role === "admin" } : null}
+      links={[
+        { href: href(locale, "/reservas"), label: dict.nav.booking },
+        { href: `${href(locale)}#proximamente`, label: dict.nav.shop, soon: true },
+        { href: `${href(locale)}#proximamente`, label: dict.nav.tournaments, soon: true },
+        { href: `${href(locale)}#proximamente`, label: dict.nav.academy, soon: true },
+      ]}
+    />
+  );
+}

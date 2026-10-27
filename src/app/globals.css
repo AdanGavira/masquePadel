@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Identidad masquePadel: azul marino del logo + amarillo pelota, modernizados. */
+@theme {
+  --color-navy-50: #eef3fb;
+  --color-navy-100: #d9e3f5;
+  --color-navy-200: #b3c7ea;
+  --color-navy-300: #7f9fd6;
+  --color-navy-400: #4a72bb;
+  --color-navy-500: #24509e;
+  --color-navy-600: #143c84;
+  --color-navy-700: #0a2f6d;
+  --color-navy-800: #072456;
+  --color-navy-900: #061a3e;
+  --color-navy-950: #030f26;
+
+  --color-ball-300: #ffe07a;
+  --color-ball-400: #ffd23f;
+  --color-ball-500: #fbc02d;
+  --color-ball-600: #e0a400;
+
+  --color-court-500: #2f6fd6;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f5f7fb;
+  --fg: #0b1324;
+  --fg-muted: #55607a;
+  --border: #e3e8f1;
+  --card: #ffffff;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #050b1a;
+  --bg-soft: #0a1428;
+  --fg: #eef2fa;
+  --fg-muted: #9aa6c0;
+  --border: #1b2742;
+  --card: #0c1730;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-soft: var(--bg-soft);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-line: var(--border);
+  --color-card: var(--card);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+::selection {
+  background: var(--color-ball-400);
+  color: var(--color-navy-950);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
