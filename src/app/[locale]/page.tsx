@@ -20,7 +20,7 @@ import { getDictionary, href, isLocale, t } from "@/lib/i18n";
 import { getSlots, slotEnd } from "@/lib/slots";
 
 const featureIcons = [Sparkles, Lightbulb, Smartphone, ShowerHead, Car, Coffee];
-const soonIcons = [ShoppingBag, Trophy, GraduationCap];
+const soonIcons = [ShoppingBag, Trophy];
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -160,11 +160,28 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </Container>
       </section>
 
+      {/* Academia */}
+      <section className="pb-20 sm:pb-28">
+        <Container>
+          <div className="relative overflow-hidden rounded-3xl bg-navy-800 px-8 py-12 text-white sm:px-12 lg:py-16">
+            <GraduationCap className="absolute -bottom-6 -right-6 size-48 text-white/5 sm:size-64" aria-hidden />
+            <p className="text-sm font-semibold uppercase tracking-wider text-ball-400">{home.academyPromo.eyebrow}</p>
+            <h2 className="mt-3 max-w-xl font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+              {home.academyPromo.title}
+            </h2>
+            <p className="mt-4 max-w-xl text-lg text-navy-100">{home.academyPromo.text}</p>
+            <ButtonLink href={href(locale, "/academia")} className="mt-8">
+              {home.academyPromo.cta} <ArrowRight className="size-4" />
+            </ButtonLink>
+          </div>
+        </Container>
+      </section>
+
       {/* Próximamente */}
       <section id="proximamente" className="scroll-mt-20 bg-bg-soft py-20 sm:py-28">
         <Container>
           <SectionHeading title={home.soon.title} subtitle={home.soon.subtitle} center />
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
             {home.soon.items.map((item, i) => {
               const Icon = soonIcons[i];
               return (

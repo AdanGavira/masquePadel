@@ -1,7 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Backend, Booking, Role } from "./types";
+import type { AcademyRequest, Backend, Booking, Role } from "./types";
 
 /**
  * Backend con Supabase (PostgreSQL + Auth). Se activa al definir
@@ -46,6 +46,46 @@ const toBooking = (row: BookingRow): Booking => ({
   createdAt: row.created_at,
   userName: row.profiles?.name,
   userEmail: row.profiles?.email,
+});
+
+interface AcademyRow {
+  id: string;
+  user_id: string | null;
+  name: string;
+  email: string;
+  phone: string;
+  for_whom: AcademyRequest["forWhom"];
+  child_age: number | null;
+  experience: AcademyRequest["experience"];
+  preferred_days: number[];
+  preferred_time: AcademyRequest["preferredTime"];
+  test_date: string | null;
+  test_slot: string | null;
+  notes: string | null;
+  status: AcademyRequest["status"];
+  assessed_level: AcademyRequest["assessedLevel"];
+  group_id: string | null;
+  created_at: string;
+}
+
+const toAcademyRequest = (r: AcademyRow): AcademyRequest => ({
+  id: r.id,
+  userId: r.user_id,
+  name: r.name,
+  email: r.email,
+  phone: r.phone,
+  forWhom: r.for_whom,
+  childAge: r.child_age,
+  experience: r.experience,
+  preferredDays: r.preferred_days ?? [],
+  preferredTime: r.preferred_time,
+  testDate: r.test_date,
+  testSlot: r.test_slot,
+  notes: r.notes ?? "",
+  status: r.status,
+  assessedLevel: r.assessed_level,
+  groupId: r.group_id,
+  createdAt: r.created_at,
 });
 
 export const supabaseBackend: Backend = {
@@ -155,6 +195,77 @@ export const supabaseBackend: Backend = {
     const { error } = blocked
       ? await supabase.from("blocks").upsert({ court_id: courtId, date, slot })
       : await supabase.from("blocks").delete().match({ court_id: courtId, date, slot });
+    if (error) throw error;
+  },
+
+  async insertAcademyRequest(r) {
+    const supabase = await client();
+    // Sin .select(): un visitante sin cuenta puede enviar la solicitud pero no leerla.
+    const { error } = await supabase.from("academy_requests").insert({
+      user_id: r.userId,
+      name: r.name,
+      email: r.email,
+      phone: r.phone,
+      for_whom: r.forWhom,
+      child_age: r.childAge,
+      experience: r.experience,
+      preferred_days: r.preferredDays,
+      preferred_time: r.preferredTime,
+      test_date: r.testDate,
+      test_slot: r.testSlot,
+      notes: r.notes || null,
+    });
+    if (error) throw error;
+  },
+
+  async levelTestCounts() {
+    const supabase = await client();
+    const { data, error } = await supabase.rpc("level_test_counts");
+    if (error) throw error;
+    return (data ?? []).map((r: { test_date: string; test_slot: string; n: number }) => ({
+      date: r.test_date,
+      slot: r.test_slot,
+      count: Number(r.n),
+    }));
+  },
+
+  async groupMemberCounts() {
+    const supabase = await client();
+    const { data, error } = await supabase.rpc("academy_group_counts");
+    if (error) throw error;
+    return Object.fromEntries((data ?? []).map((r: { group_id: string; n: number }) => [r.group_id, Number(r.n)]));
+  },
+
+  async listAcademyRequests() {
+    const supabase = await client();
+    const { data, error } = await supabase.from("academy_requests").select().order("created_at", { ascending: false });
+    if (error) throw error;
+    return data.map(toAcademyRequest);
+  },
+
+  async listUserAcademyRequests(userId) {
+    const supabase = await client();
+    const { data, error } = await supabase
+      .from("academy_requests")
+      .select()
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data.map(toAcademyRequest);
+  },
+
+  async getAcademyRequest(id) {
+    const supabase = await client();
+    const { data } = await supabase.from("academy_requests").select().eq("id", id).maybeSingle();
+    return data ? toAcademyRequest(data) : null;
+  },
+
+  async updateAcademyRequest(id, { status, assessedLevel, groupId }) {
+    const supabase = await client();
+    const { error } = await supabase
+      .from("academy_requests")
+      .update({ status, assessed_level: assessedLevel, group_id: groupId })
+      .eq("id", id);
     if (error) throw error;
   },
 };

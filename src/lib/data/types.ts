@@ -1,3 +1,4 @@
+import type { Level } from "../academy";
 import type { DateKey } from "../time";
 
 export type Role = "player" | "admin";
@@ -36,6 +37,37 @@ export interface Occupied {
   mine: boolean;
 }
 
+export type Experience = "never" | "beginner" | "intermediate" | "advanced";
+export type PreferredTime = "morning" | "afternoon" | "evening";
+export type AcademyStatus = "pending" | "assigned" | "waitlist" | "cancelled";
+
+/** Solicitud de inscripción en la academia. */
+export interface AcademyRequest {
+  id: string;
+  userId: string | null;
+  name: string;
+  email: string;
+  phone: string;
+  forWhom: "adult" | "child";
+  childAge: number | null;
+  experience: Experience;
+  /** Días preferidos: 0 = domingo … 6 = sábado. */
+  preferredDays: number[];
+  preferredTime: PreferredTime | null;
+  /** Prueba de nivel elegida, o null si prefiere que le llamen. */
+  testDate: DateKey | null;
+  testSlot: string | null;
+  notes: string;
+  status: AcademyStatus;
+  assessedLevel: Level | null;
+  groupId: string | null;
+  createdAt: string;
+}
+
+export type NewAcademyRequest = Omit<AcademyRequest, "id" | "status" | "assessedLevel" | "groupId" | "createdAt">;
+
+export type AcademyUpdate = Pick<AcademyRequest, "status" | "assessedLevel" | "groupId">;
+
 export type AuthError = "invalid" | "exists" | "weak" | "unconfirmed" | "unknown";
 
 /** `needsConfirmation`: cuenta creada, pero hay que confirmar el email antes de entrar. */
@@ -65,4 +97,14 @@ export interface Backend {
   listDayBookings(date: DateKey): Promise<Booking[]>;
   listBlocks(date: DateKey): Promise<Block[]>;
   setBlocked(block: Block, blocked: boolean): Promise<void>;
+
+  insertAcademyRequest(request: NewAcademyRequest): Promise<void>;
+  /** Inscritos en cada prueba de nivel (solicitudes no canceladas). */
+  levelTestCounts(): Promise<{ date: DateKey; slot: string; count: number }[]>;
+  /** Alumnos asignados a cada grupo. */
+  groupMemberCounts(): Promise<Record<string, number>>;
+  listAcademyRequests(): Promise<AcademyRequest[]>;
+  listUserAcademyRequests(userId: string): Promise<AcademyRequest[]>;
+  getAcademyRequest(id: string): Promise<AcademyRequest | null>;
+  updateAcademyRequest(id: string, update: AcademyUpdate): Promise<void>;
 }

@@ -1,10 +1,11 @@
 import "server-only";
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { isAcademyCell, upcomingLevelTests } from "../academy";
 import { COURTS } from "../club";
 import { getSlots } from "../slots";
-import type { DateKey } from "../time";
-import type { Backend, Block, Booking, Role, User } from "./types";
+import { todayKey, type DateKey } from "../time";
+import type { AcademyRequest, AcademyUpdate, Backend, Block, Booking, Role, User } from "./types";
 
 /**
  * Backend de demostración sin servidor de datos: cada visitante tiene su
@@ -30,6 +31,10 @@ interface DemoState {
   blocks: [number, DateKey, string][];
   /** Reservas de socios anuladas por el administrador. */
   cancelledSeeds: string[];
+  /** Solicitudes de academia enviadas desde este navegador. */
+  academy: AcademyRequest[];
+  /** Cambios del administrador sobre las solicitudes de ejemplo. */
+  academyOverrides: Record<string, AcademyUpdate>;
 }
 
 export const DEMO_ACCOUNTS = {
@@ -52,6 +57,7 @@ const COOKIE_DAYS = 30;
 const MAX_BOOKINGS = 20;
 const MAX_BLOCKS = 40;
 const MAX_USERS = 3;
+const MAX_ACADEMY = 2;
 const SECRET = process.env.SESSION_SECRET ?? "masquepadel-demo-secret-cambiar-en-produccion";
 
 // --- Ocupación ficticia de los socios ------------------------------------------
@@ -68,6 +74,7 @@ function seededBookings(date: DateKey): Booking[] {
     // Más demanda por la tarde que por la mañana.
     const demand = hour >= 17 ? 0.65 : hour >= 14 ? 0.3 : 0.2;
     for (const { id: courtId } of COURTS) {
+      if (isAcademyCell(date, courtId, slot)) continue;
       const key = `${date}|${courtId}|${slot}`;
       if (stableRandom(key) < demand) {
         const member = MEMBERS[Math.floor(stableRandom(`${key}|who`) * MEMBERS.length)];
@@ -90,6 +97,95 @@ function parseSeedId(id: string): Booking | null {
   const match = /^seed_(\d{4}-\d{2}-\d{2})_(\d)_(\d{2})(\d{2})$/.exec(id);
   if (!match) return null;
   return seededBookings(match[1]).find((b) => b.id === id) ?? null;
+}
+
+// --- Academia de ejemplo -----------------------------------------------------------
+
+/** Alumnos ya asignados a cada grupo antes de abrir la demo. */
+const SEED_GROUP_MEMBERS: Record<string, number> = {
+  "ini-lx": 3,
+  "ini-mj": 2,
+  "ini-s": 1,
+  "int-lx": 4,
+  "av-mj": 2,
+  "inf-v": 4,
+};
+
+function seededRequests(): AcademyRequest[] {
+  const tests = upcomingLevelTests();
+  const base = {
+    userId: null,
+    childAge: null,
+    notes: "",
+    status: "pending" as const,
+    assessedLevel: null,
+    groupId: null,
+    createdAt: `${todayKey()}T09:00:00.000Z`,
+  };
+  return [
+    {
+      ...base,
+      id: "seedreq-1",
+      name: "Rocío Benítez",
+      email: "rocio@ejemplo.test",
+      phone: "600 111 222",
+      forWhom: "adult",
+      experience: "never",
+      preferredDays: [1, 3],
+      preferredTime: "afternoon",
+      testDate: tests[0]?.date ?? null,
+      testSlot: tests[0]?.slot ?? null,
+      notes: "Nunca he jugado, quiero empezar con amigas.",
+    },
+    {
+      ...base,
+      id: "seedreq-2",
+      name: "Daniel Herrera",
+      email: "daniel@ejemplo.test",
+      phone: "600 333 444",
+      forWhom: "adult",
+      experience: "intermediate",
+      preferredDays: [1, 3],
+      preferredTime: "evening",
+      testDate: tests[0]?.date ?? null,
+      testSlot: tests[0]?.slot ?? null,
+    },
+    {
+      ...base,
+      id: "seedreq-3",
+      name: "Hugo Morales",
+      email: "familia.morales@ejemplo.test",
+      phone: "600 555 666",
+      forWhom: "child",
+      childAge: 10,
+      experience: "beginner",
+      preferredDays: [5],
+      preferredTime: "afternoon",
+      testDate: tests[1]?.date ?? null,
+      testSlot: tests[1]?.slot ?? null,
+    },
+    {
+      ...base,
+      id: "seedreq-4",
+      name: "Inés Castro",
+      email: "ines@ejemplo.test",
+      phone: "600 777 888",
+      forWhom: "adult",
+      experience: "advanced",
+      preferredDays: [2, 4],
+      preferredTime: "evening",
+      testDate: null,
+      testSlot: null,
+      notes: "Prefiero que me llaméis por la tarde.",
+    },
+  ];
+}
+
+function allRequests(state: DemoState): AcademyRequest[] {
+  return [
+    ...seededRequests().map((r) => ({ ...r, ...state.academyOverrides[r.id] })),
+    ...state.academy,
+  ];
 }
 
 // --- Cookies firmadas -------------------------------------------------------------
@@ -126,8 +222,15 @@ const cookieOptions = () => ({
 });
 
 async function readState(): Promise<DemoState> {
-  const state = decode<DemoState>((await cookies()).get(STATE_COOKIE)?.value);
-  return state ?? { users: [], bookings: [], blocks: [], cancelledSeeds: [] };
+  const state = decode<Partial<DemoState>>((await cookies()).get(STATE_COOKIE)?.value) ?? {};
+  return {
+    users: state.users ?? [],
+    bookings: state.bookings ?? [],
+    blocks: state.blocks ?? [],
+    cancelledSeeds: state.cancelledSeeds ?? [],
+    academy: state.academy ?? [],
+    academyOverrides: state.academyOverrides ?? {},
+  };
 }
 
 /** Solo se puede llamar desde acciones de servidor (es cuando se escriben cookies). */
@@ -137,6 +240,7 @@ async function writeState(state: DemoState) {
   state.blocks = state.blocks.slice(-MAX_BLOCKS);
   state.users = state.users.slice(-MAX_USERS);
   state.cancelledSeeds = state.cancelledSeeds.slice(-MAX_BOOKINGS);
+  state.academy = state.academy.slice(-MAX_ACADEMY);
   (await cookies()).set(STATE_COOKIE, encode(state), cookieOptions());
 }
 
@@ -300,6 +404,59 @@ export const demoBackend: Backend = {
     const state = await readState();
     state.blocks = state.blocks.filter(([c, d, s]) => !(c === courtId && d === date && s === slot));
     if (blocked) state.blocks.push([courtId, date, slot]);
+    await writeState(state);
+  },
+
+  async insertAcademyRequest(request) {
+    const state = await readState();
+    state.academy.push({
+      ...request,
+      id: `req-${randomBytes(6).toString("hex")}`,
+      status: "pending",
+      assessedLevel: null,
+      groupId: null,
+      createdAt: new Date().toISOString(),
+    });
+    await writeState(state);
+  },
+
+  async levelTestCounts() {
+    const counts = new Map<string, { date: DateKey; slot: string; count: number }>();
+    for (const r of allRequests(await readState())) {
+      if (!r.testDate || !r.testSlot || r.status === "cancelled") continue;
+      const key = `${r.testDate} ${r.testSlot}`;
+      const entry = counts.get(key) ?? { date: r.testDate, slot: r.testSlot, count: 0 };
+      entry.count++;
+      counts.set(key, entry);
+    }
+    return [...counts.values()];
+  },
+
+  async groupMemberCounts() {
+    const counts = { ...SEED_GROUP_MEMBERS };
+    for (const r of allRequests(await readState())) {
+      if (r.status === "assigned" && r.groupId) counts[r.groupId] = (counts[r.groupId] ?? 0) + 1;
+    }
+    return counts;
+  },
+
+  async listAcademyRequests() {
+    return allRequests(await readState());
+  },
+
+  async listUserAcademyRequests(userId) {
+    return (await readState()).academy.filter((r) => r.userId === userId);
+  },
+
+  async getAcademyRequest(id) {
+    return allRequests(await readState()).find((r) => r.id === id) ?? null;
+  },
+
+  async updateAcademyRequest(id, update) {
+    const state = await readState();
+    const own = state.academy.find((r) => r.id === id);
+    if (own) Object.assign(own, update);
+    else if (seededRequests().some((r) => r.id === id)) state.academyOverrides[id] = update;
     await writeState(state);
   },
 };

@@ -1,4 +1,5 @@
 import "server-only";
+import { isAcademyCell } from "./academy";
 import { CLUB } from "./club";
 import { backend, type Booking, type User } from "./data";
 import { canCancel, hasSlotStarted, isBookableDate, isValidCourt, isValidSlot } from "./slots";
@@ -20,6 +21,7 @@ export async function bookSlot(
   const { courtId, date, slot } = input;
   if (!isValidCourt(courtId) || !isBookableDate(date) || !isValidSlot(slot)) return { ok: false, error: "invalid" };
   if (hasSlotStarted(date, slot)) return { ok: false, error: "past" };
+  if (isAcademyCell(date, courtId, slot)) return { ok: false, error: "taken" };
 
   const active = (await backend.listUserBookings(user.id)).filter((b) => isUpcoming(b));
   if (active.length >= CLUB.maxActiveBookingsPerUser) return { ok: false, error: "limit" };

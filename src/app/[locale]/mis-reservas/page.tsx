@@ -1,8 +1,10 @@
-import { CalendarDays, Clock } from "lucide-react";
+import { CalendarDays, Clock, GraduationCap } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
 import { ButtonLink, Container, cx } from "@/components/ui";
+import { getGroup } from "@/lib/academy";
+import { groupName } from "@/lib/academy-format";
 import { isUpcoming } from "@/lib/bookings";
 import { CLUB } from "@/lib/club";
 import { backend, type Booking } from "@/lib/data";
@@ -25,7 +27,10 @@ export default async function MyBookingsPage({ params }: { params: Promise<{ loc
   const user = await backend.getCurrentUser();
   if (!user) redirect(`${href(locale, "/acceso")}?next=${encodeURIComponent(href(locale, "/mis-reservas"))}`);
 
-  const all = await backend.listUserBookings(user.id);
+  const [all, academy] = await Promise.all([
+    backend.listUserBookings(user.id),
+    backend.listUserAcademyRequests(user.id),
+  ]);
   const upcoming = all.filter((b) => isUpcoming(b)).sort(byStart);
   const history = all
     .filter((b) => !isUpcoming(b))
@@ -55,6 +60,53 @@ export default async function MyBookingsPage({ params }: { params: Promise<{ loc
             {upcoming.map((b) => (
               <BookingItem key={b.id} booking={b} locale={locale} dict={dict} />
             ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-12">
+        <h2 className="mb-4 font-display text-xl font-bold">{dict.academy.mine.title}</h2>
+        {academy.length === 0 ? (
+          <div className="flex flex-col items-start gap-4 rounded-2xl border border-line bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex items-center gap-3 text-fg-muted">
+              <GraduationCap className="size-6 shrink-0 text-ball-500" /> {dict.home.academyPromo.title}
+            </p>
+            <ButtonLink href={href(locale, "/academia")} variant="ghost" className="shrink-0">
+              {dict.academy.mine.cta}
+            </ButtonLink>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {academy.map((r) => {
+              const group = getGroup(r.groupId);
+              return (
+                <li key={r.id} className="flex items-start gap-4 rounded-2xl border border-line bg-card p-5">
+                  <GraduationCap className="mt-0.5 size-6 shrink-0 text-ball-500" />
+                  <div>
+                    <p className="font-display text-lg font-bold">{r.name}</p>
+                    <p
+                      className={cx(
+                        "mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                        r.status === "assigned"
+                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200"
+                          : "bg-bg-soft text-fg-muted",
+                      )}
+                    >
+                      {dict.academy.status[r.status]}
+                    </p>
+                    <p className="mt-2 text-sm text-fg-muted">
+                      {group
+                        ? groupName(dict, group)
+                        : r.status === "pending"
+                          ? r.testDate
+                            ? t(dict.academy.mine.test, { date: formatDate(locale, r.testDate), time: r.testSlot ?? "" })
+                            : dict.academy.mine.noTest
+                          : null}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

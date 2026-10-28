@@ -12,9 +12,10 @@ Web de un club de pádel en Sevilla (ficticio, de momento): portada, reserva de 
 - **Límite:** 3 reservas activas por jugador.
 - **Mis reservas:** próximas reservas, historial y cancelación.
 - **Panel de administración:** ocupación e ingresos del día, reservas con nombre del jugador y bloqueo de pistas.
-- **Próximamente:** tienda, torneos y ranking, academia.
+- **Academia:** cursos mensuales por niveles, solicitud online (con o sin cuenta), prueba de nivel gratuita los sábados y asignación de grupo desde el panel. Las clases ocupan sus pistas en el calendario de reservas.
+- **Próximamente:** tienda, torneos y ranking.
 
-Toda la configuración del club (horario, precios, reglas) está en [`src/lib/club.ts`](src/lib/club.ts).
+Toda la configuración del club (horario, precios, reglas) está en [`src/lib/club.ts`](src/lib/club.ts), y la de la academia (grupos, horarios, entrenadores, precios) en [`src/lib/academy.ts`](src/lib/academy.ts).
 
 ## Arrancar en local
 
@@ -35,7 +36,7 @@ Para empezar de cero, borra las cookies del sitio.
 ## Pasar a Supabase
 
 1. Crea un proyecto gratuito en [supabase.com](https://supabase.com).
-2. En *SQL Editor*, ejecuta [`supabase/migrations/0001_reservas.sql`](supabase/migrations/0001_reservas.sql).
+2. En *SQL Editor*, ejecuta en orden [`0001_reservas.sql`](supabase/migrations/0001_reservas.sql) y [`0002_academia.sql`](supabase/migrations/0002_academia.sql).
 3. Copia `.env.example` a `.env.local` y rellena `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 4. Regístrate en la web y hazte administrador:
    ```sql

@@ -15,7 +15,7 @@ export async function Header({ locale }: { locale: Locale }) {
         { href: href(locale, "/reservas"), label: dict.nav.booking },
         { href: `${href(locale)}#proximamente`, label: dict.nav.shop, soon: true },
         { href: `${href(locale)}#proximamente`, label: dict.nav.tournaments, soon: true },
-        { href: `${href(locale)}#proximamente`, label: dict.nav.academy, soon: true },
+        { href: href(locale, "/academia"), label: dict.nav.academy },
       ]}
     />
   );

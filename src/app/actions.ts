@@ -3,6 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  adminUpdateRequest,
+  submitAcademyRequest,
+  type AcademyFormError,
+  type AdminAcademyError,
+} from "@/lib/academy-service";
 import { bookSlot, cancelBooking, type BookError, type CancelError } from "@/lib/bookings";
 import { backend, type AuthError } from "@/lib/data";
 import { href, isLocale, type Locale } from "@/lib/i18n";
@@ -98,4 +104,25 @@ export async function adminBlockAction(formData: FormData) {
   if (!isValidCourt(courtId) || !isBookableDate(date) || !isValidSlot(slot)) return;
   await backend.setBlocked({ courtId, date, slot }, formData.get("blocked") === "true");
   revalidatePath("/[locale]", "layout");
+}
+
+export type AcademyFormState =
+  | { ok: true; testDate: string | null; testSlot: string | null }
+  | { ok: false; error: AcademyFormError }
+  | undefined;
+
+export async function academyRequestAction(_: AcademyFormState, formData: FormData): Promise<AcademyFormState> {
+  const user = await backend.getCurrentUser();
+  const result = await submitAcademyRequest(user, formData);
+  if (result.ok) revalidatePath("/[locale]", "layout");
+  return result;
+}
+
+export type AdminAcademyState = { ok: true } | { ok: false; error: AdminAcademyError } | undefined;
+
+export async function adminAcademyAction(_: AdminAcademyState, formData: FormData): Promise<AdminAcademyState> {
+  const user = await backend.getCurrentUser();
+  const result = await adminUpdateRequest(user, formData);
+  if (result.ok) revalidatePath("/[locale]", "layout");
+  return result;
 }
