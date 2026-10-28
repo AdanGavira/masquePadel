@@ -1,6 +1,6 @@
 import "server-only";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { client } from "./supabase-client";
+import { supabaseTournaments } from "./supabase-tournaments";
 import type { AcademyRequest, Backend, Booking, Role } from "./types";
 
 /**
@@ -9,21 +9,6 @@ import type { AcademyRequest, Backend, Booking, Role } from "./types";
  * El esquema está en supabase/migrations.
  */
 
-async function client() {
-  const store = await cookies();
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    cookies: {
-      getAll: () => store.getAll(),
-      setAll: (list) => {
-        try {
-          list.forEach(({ name, value, options }) => store.set(name, value, options));
-        } catch {
-          // Llamado desde un Server Component: el middleware ya refresca la sesión.
-        }
-      },
-    },
-  });
-}
 
 interface BookingRow {
   id: string;
@@ -90,6 +75,7 @@ const toAcademyRequest = (r: AcademyRow): AcademyRequest => ({
 
 export const supabaseBackend: Backend = {
   mode: "supabase",
+  ...supabaseTournaments,
 
   async getCurrentUser() {
     const supabase = await client();

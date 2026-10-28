@@ -20,7 +20,6 @@ import { getDictionary, href, isLocale, t } from "@/lib/i18n";
 import { getSlots, slotEnd } from "@/lib/slots";
 
 const featureIcons = [Sparkles, Lightbulb, Smartphone, ShowerHead, Car, Coffee];
-const soonIcons = [ShoppingBag, Trophy];
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -160,42 +159,41 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </Container>
       </section>
 
-      {/* Academia */}
+      {/* Academia y torneos */}
       <section className="pb-20 sm:pb-28">
-        <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-navy-800 px-8 py-12 text-white sm:px-12 lg:py-16">
-            <GraduationCap className="absolute -bottom-6 -right-6 size-48 text-white/5 sm:size-64" aria-hidden />
-            <p className="text-sm font-semibold uppercase tracking-wider text-ball-400">{home.academyPromo.eyebrow}</p>
-            <h2 className="mt-3 max-w-xl font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-              {home.academyPromo.title}
-            </h2>
-            <p className="mt-4 max-w-xl text-lg text-navy-100">{home.academyPromo.text}</p>
-            <ButtonLink href={href(locale, "/academia")} className="mt-8">
-              {home.academyPromo.cta} <ArrowRight className="size-4" />
-            </ButtonLink>
-          </div>
+        <Container className="grid gap-5 lg:grid-cols-2">
+          {[
+            { promo: home.academyPromo, Icon: GraduationCap, path: "/academia", tone: "bg-navy-800 text-white" },
+            { promo: home.tournamentsPromo, Icon: Trophy, path: "/torneos", tone: "bg-navy-950 text-white" },
+          ].map(({ promo, Icon, path, tone }) => (
+            <div key={path} className={`relative flex flex-col overflow-hidden rounded-3xl px-8 py-10 sm:px-10 ${tone}`}>
+              <Icon className="absolute -bottom-6 -right-6 size-44 text-white/5" aria-hidden />
+              <p className="text-sm font-semibold uppercase tracking-wider text-ball-400">{promo.eyebrow}</p>
+              <h2 className="mt-3 max-w-md font-display text-2xl font-extrabold tracking-tight sm:text-3xl">{promo.title}</h2>
+              <p className="mt-3 max-w-md text-navy-100">{promo.text}</p>
+              <ButtonLink href={href(locale, path)} className="mt-8 self-start">
+                {promo.cta} <ArrowRight className="size-4" />
+              </ButtonLink>
+            </div>
+          ))}
         </Container>
       </section>
 
       {/* Próximamente */}
-      <section id="proximamente" className="scroll-mt-20 bg-bg-soft py-20 sm:py-28">
+      <section id="proximamente" className="scroll-mt-20 pb-20 sm:pb-28">
         <Container>
-          <SectionHeading title={home.soon.title} subtitle={home.soon.subtitle} center />
-          <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
-            {home.soon.items.map((item, i) => {
-              const Icon = soonIcons[i];
-              return (
-                <Card key={item.title} className="relative">
-                  <span className="absolute right-5 top-5 rounded-full border border-line px-2.5 py-0.5 text-xs font-semibold text-fg-muted">
-                    {home.soon.badge}
-                  </span>
-                  <Icon className="size-8 text-ball-500" />
-                  <h3 className="mt-4 font-display text-xl font-bold">{item.title}</h3>
-                  <p className="mt-2 text-fg-muted">{item.text}</p>
-                </Card>
-              );
-            })}
-          </div>
+          {home.soon.items.map((item) => (
+            <Card key={item.title} className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              <ShoppingBag className="size-8 shrink-0 text-ball-500" />
+              <div className="flex-1">
+                <h3 className="font-display text-xl font-bold">{item.title}</h3>
+                <p className="mt-1 text-fg-muted">{item.text}</p>
+              </div>
+              <span className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-fg-muted">
+                {home.soon.badge}
+              </span>
+            </Card>
+          ))}
         </Container>
       </section>
 

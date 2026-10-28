@@ -13,9 +13,10 @@ Web de un club de pádel en Sevilla (ficticio, de momento): portada, reserva de 
 - **Mis reservas:** próximas reservas, historial y cancelación.
 - **Panel de administración:** ocupación e ingresos del día, reservas con nombre del jugador y bloqueo de pistas.
 - **Academia:** cursos mensuales por niveles, solicitud online (con o sin cuenta), prueba de nivel gratuita los sábados y asignación de grupo desde el panel. Las clases ocupan sus pistas en el calendario de reservas.
-- **Próximamente:** tienda, torneos y ranking.
+- **Torneos y ranking:** torneos de fin de semana por parejas (masculino, femenino y mixto) en las pistas 1–3, inscripción online, cuadro eliminatorio con cabezas de serie según el ranking, resultados desde el panel y ranking individual por puntos (campeón 100, finalista 60, semifinal 35, cuartos 20, participación 5).
+- **Próximamente:** tienda.
 
-Toda la configuración del club (horario, precios, reglas) está en [`src/lib/club.ts`](src/lib/club.ts), y la de la academia (grupos, horarios, entrenadores, precios) en [`src/lib/academy.ts`](src/lib/academy.ts).
+Toda la configuración del club (horario, precios, reglas) está en [`src/lib/club.ts`](src/lib/club.ts), la de la academia (grupos, horarios, entrenadores, precios) en [`src/lib/academy.ts`](src/lib/academy.ts) y la de los torneos (pistas, puntos del ranking) en [`src/lib/tournaments.ts`](src/lib/tournaments.ts).
 
 ## Arrancar en local
 
@@ -36,7 +37,7 @@ Para empezar de cero, borra las cookies del sitio.
 ## Pasar a Supabase
 
 1. Crea un proyecto gratuito en [supabase.com](https://supabase.com).
-2. En *SQL Editor*, ejecuta en orden [`0001_reservas.sql`](supabase/migrations/0001_reservas.sql) y [`0002_academia.sql`](supabase/migrations/0002_academia.sql).
+2. En *SQL Editor*, ejecuta en orden [`0001_reservas.sql`](supabase/migrations/0001_reservas.sql), [`0002_academia.sql`](supabase/migrations/0002_academia.sql) y [`0003_torneos.sql`](supabase/migrations/0003_torneos.sql).
 3. Copia `.env.example` a `.env.local` y rellena `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 4. Regístrate en la web y hazte administrador:
    ```sql

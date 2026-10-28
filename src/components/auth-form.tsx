@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useRef } from "react";
+import { useRef } from "react";
 import { loginAction, registerAction, type FormState } from "@/app/actions";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { Alert, Button } from "./ui";
+import { useFormAction } from "./use-form-action";
 
 const input =
   "mt-1.5 block w-full rounded-xl border border-line bg-bg px-4 py-3 text-fg outline-none transition-colors placeholder:text-fg-muted/60 focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20";
@@ -24,10 +25,7 @@ export function AuthForm({
   altHref: string;
   demoAccounts?: { label: string; email: string; password: string }[];
 }) {
-  const [state, action, pending] = useActionState<FormState, FormData>(
-    mode === "login" ? loginAction : registerAction,
-    undefined,
-  );
+  const [state, onSubmit, pending] = useFormAction<FormState>(mode === "login" ? loginAction : registerAction);
   const formRef = useRef<HTMLFormElement>(null);
 
   const fillDemo = (email: string, password: string) => {
@@ -39,7 +37,7 @@ export function AuthForm({
 
   return (
     <div className="space-y-6">
-      <form ref={formRef} action={action} className="space-y-4">
+      <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
         <input type="hidden" name="locale" value={locale} />
         {next && <input type="hidden" name="next" value={next} />}
 

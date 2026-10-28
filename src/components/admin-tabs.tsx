@@ -8,12 +8,13 @@ export function AdminTabs({
   dict,
 }: {
   locale: Locale;
-  active: "bookings" | "academy";
-  dict: Dictionary["academy"]["admin"];
+  active: "bookings" | "academy" | "tournaments";
+  dict: Dictionary;
 }) {
   const tabs = [
-    { id: "bookings", label: dict.bookingsTab, href: href(locale, "/admin") },
-    { id: "academy", label: dict.academyTab, href: href(locale, "/admin/academia") },
+    { id: "bookings", label: dict.academy.admin.bookingsTab, href: href(locale, "/admin") },
+    { id: "academy", label: dict.academy.admin.academyTab, href: href(locale, "/admin/academia") },
+    { id: "tournaments", label: dict.tournaments.admin.tab, href: href(locale, "/admin/torneos") },
   ] as const;
   return (
     <nav aria-label="Panel" className="mb-8 flex gap-1 border-b border-line">

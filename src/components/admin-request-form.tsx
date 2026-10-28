@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
 import { adminAcademyAction, type AdminAcademyState } from "@/app/actions";
 import { LEVELS, type Level } from "@/lib/academy";
 import type { AcademyStatus } from "@/lib/data/types";
 import type { Dictionary } from "@/lib/i18n";
 import { Alert, Button } from "./ui";
+import { useFormAction } from "./use-form-action";
 
 const select =
   "mt-1 block w-full rounded-xl border border-line bg-bg px-3 py-2 text-sm text-fg outline-none focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20";
@@ -25,11 +25,11 @@ export function AdminRequestForm({
   groupOptions: { value: string; label: string }[];
   dict: Dictionary["academy"];
 }) {
-  const [state, action, pending] = useActionState<AdminAcademyState, FormData>(adminAcademyAction, undefined);
+  const [state, onSubmit, pending] = useFormAction<AdminAcademyState>(adminAcademyAction);
   const statuses = Object.keys(dict.status) as AcademyStatus[];
 
   return (
-    <form action={action} className="space-y-3 rounded-2xl bg-bg-soft p-4">
+    <form onSubmit={onSubmit} className="space-y-3 rounded-2xl bg-bg-soft p-4">
       <input type="hidden" name="id" value={id} />
       <label className="block text-xs font-semibold text-fg-muted">
         {dict.admin.level}

@@ -62,7 +62,7 @@ export default async function AdminAcademyPage({
     <Container className="py-10 sm:py-14">
       <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{dict.admin.title}</h1>
       <p className="mb-6 mt-2 text-fg-muted">{a.subtitle}</p>
-      <AdminTabs locale={locale} active="academy" dict={a} />
+      <AdminTabs locale={locale} active="academy" dict={dict} />
 
       <div className="grid gap-8 lg:grid-cols-3">
         <section className="lg:col-span-2">

@@ -1,4 +1,4 @@
-import { GraduationCap, Lock, ShieldAlert, Unlock, X } from "lucide-react";
+import { GraduationCap, Lock, ShieldAlert, Trophy, Unlock, X } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { adminBlockAction, adminCancelAction } from "@/app/actions";
@@ -8,6 +8,7 @@ import { DateStrip } from "@/components/date-strip";
 import { Card, Container } from "@/components/ui";
 import { academyCells, getGroup } from "@/lib/academy";
 import { CLUB, COURTS } from "@/lib/club";
+import { tournamentCells } from "@/lib/tournaments";
 import { backend } from "@/lib/data";
 import { formatDate, getDictionary, href, isLocale, t } from "@/lib/i18n";
 import { getSlots, hasSlotStarted, isBookableDate, slotEnd } from "@/lib/slots";
@@ -44,9 +45,11 @@ export default async function AdminPage({
   const date = isBookableDate(requested) ? requested : todayKey();
   const [bookings, blocks] = await Promise.all([backend.listDayBookings(date), backend.listBlocks(date)]);
   const classes = academyCells(date);
+  const tournaments = await backend.listTournaments();
+  const tournamentDay = tournamentCells(tournaments, date);
 
   const slots = getSlots();
-  const totalCells = slots.length * COURTS.length - classes.length;
+  const totalCells = slots.length * COURTS.length - classes.length - tournamentDay.length;
   const occupancy = Math.round((bookings.length / totalCells) * 100);
   const revenue = bookings.length * CLUB.pricePerCourt;
 
@@ -54,7 +57,7 @@ export default async function AdminPage({
     <Container className="py-10 sm:py-14">
       <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{dict.admin.title}</h1>
       <p className="mb-6 mt-2 text-fg-muted">{dict.admin.subtitle}</p>
-      <AdminTabs locale={locale} active="bookings" dict={dict.academy.admin} />
+      <AdminTabs locale={locale} active="bookings" dict={dict} />
 
       <DateStrip locale={locale} path="/admin" selected={date} todayLabel={dict.booking.today} />
 
@@ -110,9 +113,17 @@ export default async function AdminPage({
                     const booking = bookings.find((b) => b.courtId === id && b.slot === slot);
                     const blocked = blocks.some((b) => b.courtId === id && b.slot === slot);
                     const lesson = classes.find((c) => c.courtId === id && c.slot === slot);
+                    const tournament = tournamentDay.find((c) => c.courtId === id && c.slot === slot);
                     return (
                       <td key={id} className="px-3 py-2 align-top">
-                        {lesson ? (
+                        {tournament ? (
+                          <div className="flex items-center gap-2 rounded-lg border border-ball-500/40 px-3 py-2 text-ball-600 dark:text-ball-400">
+                            <Trophy className="size-4 shrink-0" />
+                            <span className="truncate font-semibold">
+                              {tournaments.find((t) => t.id === tournament.tournamentId)?.name}
+                            </span>
+                          </div>
+                        ) : lesson ? (
                           <div className="flex items-center gap-2 rounded-lg border border-navy-200 px-3 py-2 text-navy-700 dark:border-navy-800 dark:text-navy-200">
                             <GraduationCap className="size-4 shrink-0" />
                             <span className="truncate font-semibold">

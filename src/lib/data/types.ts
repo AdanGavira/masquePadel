@@ -1,4 +1,5 @@
 import type { Level } from "../academy";
+import type { Category, MatchResult, Pair, Tournament } from "../tournaments";
 import type { DateKey } from "../time";
 
 export type Role = "player" | "admin";
@@ -68,6 +69,26 @@ export type NewAcademyRequest = Omit<AcademyRequest, "id" | "status" | "assessed
 
 export type AcademyUpdate = Pick<AcademyRequest, "status" | "assessedLevel" | "groupId">;
 
+/** Inscripción completa, con emails: solo para el propio jugador y el administrador. */
+export interface Registration extends Pair {
+  userId: string;
+  player1Email: string;
+  player2Email: string;
+  status: "confirmed" | "cancelled";
+}
+
+export type NewTournament = Omit<Tournament, "id" | "bracketGenerated">;
+
+export interface NewRegistration {
+  tournamentId: string;
+  category: Category;
+  userId: string;
+  player1Name: string;
+  player1Email: string;
+  player2Name: string;
+  player2Email: string;
+}
+
 export type AuthError = "invalid" | "exists" | "weak" | "unconfirmed" | "unknown";
 
 /** `needsConfirmation`: cuenta creada, pero hay que confirmar el email antes de entrar. */
@@ -107,4 +128,21 @@ export interface Backend {
   listUserAcademyRequests(userId: string): Promise<AcademyRequest[]>;
   getAcademyRequest(id: string): Promise<AcademyRequest | null>;
   updateAcademyRequest(id: string, update: AcademyUpdate): Promise<void>;
+
+  listTournaments(): Promise<Tournament[]>;
+  getTournament(id: string): Promise<Tournament | null>;
+  createTournament(tournament: NewTournament): Promise<Tournament>;
+  /** Parejas confirmadas, sin emails (público). */
+  listPairs(tournamentId?: string): Promise<Pair[]>;
+  /** Inscripciones donde el usuario es jugador 1 o su email es el del compañero. */
+  listUserRegistrations(userId: string, email: string): Promise<Registration[]>;
+  listTournamentRegistrations(tournamentId: string): Promise<Registration[]>;
+  getRegistration(id: string): Promise<Registration | null>;
+  /** Comprueba cupo y que ningún jugador esté ya inscrito en la categoría. */
+  insertRegistration(registration: NewRegistration): Promise<{ ok: true } | { ok: false; error: "duplicate" | "full" }>;
+  cancelRegistration(id: string): Promise<void>;
+  /** Guarda las cabezas de serie y cierra las inscripciones. */
+  generateBracket(tournamentId: string, seeds: { id: string; seed: number }[]): Promise<void>;
+  listResults(tournamentId?: string): Promise<MatchResult[]>;
+  setResult(result: MatchResult): Promise<void>;
 }

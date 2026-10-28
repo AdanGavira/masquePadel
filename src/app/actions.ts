@@ -11,6 +11,17 @@ import {
 } from "@/lib/academy-service";
 import { bookSlot, cancelBooking, type BookError, type CancelError } from "@/lib/bookings";
 import { backend, type AuthError } from "@/lib/data";
+import {
+  cancelRegistration,
+  createTournament,
+  generateBracket,
+  registerPair,
+  setResult,
+  type BracketError,
+  type CreateTournamentError,
+  type RegisterError,
+  type ResultError,
+} from "@/lib/tournament-service";
 import { href, isLocale, type Locale } from "@/lib/i18n";
 import { isBookableDate, isValidCourt, isValidSlot } from "@/lib/slots";
 
@@ -123,6 +134,43 @@ export type AdminAcademyState = { ok: true } | { ok: false; error: AdminAcademyE
 export async function adminAcademyAction(_: AdminAcademyState, formData: FormData): Promise<AdminAcademyState> {
   const user = await backend.getCurrentUser();
   const result = await adminUpdateRequest(user, formData);
+  if (result.ok) revalidatePath("/[locale]", "layout");
+  return result;
+}
+
+export type RegisterPairState = { ok: true } | { ok: false; error: RegisterError } | undefined;
+
+export async function registerPairAction(_: RegisterPairState, formData: FormData): Promise<RegisterPairState> {
+  const result = await registerPair(await backend.getCurrentUser(), formData);
+  if (result.ok) revalidatePath("/[locale]", "layout");
+  return result;
+}
+
+export async function cancelRegistrationAction(formData: FormData) {
+  await cancelRegistration(await backend.getCurrentUser(), String(formData.get("registrationId")));
+  revalidatePath("/[locale]", "layout");
+}
+
+export type CreateTournamentState = { ok: true; id: string } | { ok: false; error: CreateTournamentError } | undefined;
+
+export async function createTournamentAction(_: CreateTournamentState, formData: FormData): Promise<CreateTournamentState> {
+  const result = await createTournament(await backend.getCurrentUser(), formData);
+  if (result.ok) revalidatePath("/[locale]", "layout");
+  return result;
+}
+
+export type BracketState = { ok: true } | { ok: false; error: BracketError } | undefined;
+
+export async function generateBracketAction(_: BracketState, formData: FormData): Promise<BracketState> {
+  const result = await generateBracket(await backend.getCurrentUser(), String(formData.get("tournamentId")));
+  if (result.ok) revalidatePath("/[locale]", "layout");
+  return result;
+}
+
+export type ResultState = { ok: true } | { ok: false; error: ResultError } | undefined;
+
+export async function setResultAction(_: ResultState, formData: FormData): Promise<ResultState> {
+  const result = await setResult(await backend.getCurrentUser(), formData);
   if (result.ok) revalidatePath("/[locale]", "layout");
   return result;
 }

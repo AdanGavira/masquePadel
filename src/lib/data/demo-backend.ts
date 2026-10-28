@@ -1,10 +1,12 @@
 import "server-only";
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { isAcademyCell, upcomingLevelTests } from "../academy";
 import { COURTS } from "../club";
 import { getSlots } from "../slots";
 import { todayKey, type DateKey } from "../time";
+import { COOKIE_DAYS, cookieOptions, decode, encode, stableRandom } from "./demo-cookies";
+import { demoTournaments } from "./demo-tournaments";
 import type { AcademyRequest, AcademyUpdate, Backend, Block, Booking, Role, User } from "./types";
 
 /**
@@ -53,19 +55,12 @@ const MEMBERS = ["Lucía Romero", "Javier Ortega", "Marta Gil", "Pablo Núñez",
 
 const SESSION_COOKIE = "mp_session";
 const STATE_COOKIE = "mp_demo";
-const COOKIE_DAYS = 30;
 const MAX_BOOKINGS = 20;
 const MAX_BLOCKS = 40;
 const MAX_USERS = 3;
 const MAX_ACADEMY = 2;
-const SECRET = process.env.SESSION_SECRET ?? "masquepadel-demo-secret-cambiar-en-produccion";
 
 // --- Ocupación ficticia de los socios ------------------------------------------
-
-/** Número pseudoaleatorio estable en [0, 1) para un texto dado. */
-function stableRandom(key: string): number {
-  return createHmac("sha256", "masquepadel-seed").update(key).digest().readUInt32BE(0) / 2 ** 32;
-}
 
 function seededBookings(date: DateKey): Booking[] {
   const result: Booking[] = [];
@@ -188,38 +183,7 @@ function allRequests(state: DemoState): AcademyRequest[] {
   ];
 }
 
-// --- Cookies firmadas -------------------------------------------------------------
-
-function sign(value: string): string {
-  return createHmac("sha256", SECRET).update(value).digest("base64url");
-}
-
-function encode(data: unknown): string {
-  const payload = Buffer.from(JSON.stringify(data)).toString("base64url");
-  return `${payload}.${sign(payload)}`;
-}
-
-function decode<T>(raw: string | undefined): T | null {
-  if (!raw) return null;
-  const [payload, signature] = raw.split(".");
-  if (!payload || !signature) return null;
-  const expected = Buffer.from(sign(payload));
-  const actual = Buffer.from(signature);
-  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return null;
-  try {
-    return JSON.parse(Buffer.from(payload, "base64url").toString()) as T;
-  } catch {
-    return null;
-  }
-}
-
-const cookieOptions = () => ({
-  httpOnly: true,
-  sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
-  path: "/",
-  maxAge: COOKIE_DAYS * 86400,
-});
+// --- Estado del visitante ----------------------------------------------------------
 
 async function readState(): Promise<DemoState> {
   const state = decode<Partial<DemoState>>((await cookies()).get(STATE_COOKIE)?.value) ?? {};
@@ -296,6 +260,7 @@ const sameSlot = (a: { courtId: number; slot: string }, b: { courtId: number; sl
 
 export const demoBackend: Backend = {
   mode: "demo",
+  ...demoTournaments,
 
   async getCurrentUser() {
     const uid = await sessionUserId();
