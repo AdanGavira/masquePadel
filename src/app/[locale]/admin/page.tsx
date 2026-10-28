@@ -1,10 +1,12 @@
-import { Lock, ShieldAlert, Unlock, X } from "lucide-react";
+import { GraduationCap, Lock, ShieldAlert, Unlock, X } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { adminBlockAction, adminCancelAction } from "@/app/actions";
 import { ConfirmSubmit } from "@/components/confirm-submit";
+import { AdminTabs } from "@/components/admin-tabs";
 import { DateStrip } from "@/components/date-strip";
 import { Card, Container } from "@/components/ui";
+import { academyCells, getGroup } from "@/lib/academy";
 import { CLUB, COURTS } from "@/lib/club";
 import { backend } from "@/lib/data";
 import { formatDate, getDictionary, href, isLocale, t } from "@/lib/i18n";
@@ -41,16 +43,18 @@ export default async function AdminPage({
   const { date: requested } = await searchParams;
   const date = isBookableDate(requested) ? requested : todayKey();
   const [bookings, blocks] = await Promise.all([backend.listDayBookings(date), backend.listBlocks(date)]);
+  const classes = academyCells(date);
 
   const slots = getSlots();
-  const totalCells = slots.length * COURTS.length;
+  const totalCells = slots.length * COURTS.length - classes.length;
   const occupancy = Math.round((bookings.length / totalCells) * 100);
   const revenue = bookings.length * CLUB.pricePerCourt;
 
   return (
     <Container className="py-10 sm:py-14">
       <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{dict.admin.title}</h1>
-      <p className="mb-8 mt-2 text-fg-muted">{dict.admin.subtitle}</p>
+      <p className="mb-6 mt-2 text-fg-muted">{dict.admin.subtitle}</p>
+      <AdminTabs locale={locale} active="bookings" dict={dict.academy.admin} />
 
       <DateStrip locale={locale} path="/admin" selected={date} todayLabel={dict.booking.today} />
 
@@ -105,9 +109,19 @@ export default async function AdminPage({
                   {COURTS.map(({ id }) => {
                     const booking = bookings.find((b) => b.courtId === id && b.slot === slot);
                     const blocked = blocks.some((b) => b.courtId === id && b.slot === slot);
+                    const lesson = classes.find((c) => c.courtId === id && c.slot === slot);
                     return (
                       <td key={id} className="px-3 py-2 align-top">
-                        {booking ? (
+                        {lesson ? (
+                          <div className="flex items-center gap-2 rounded-lg border border-navy-200 px-3 py-2 text-navy-700 dark:border-navy-800 dark:text-navy-200">
+                            <GraduationCap className="size-4 shrink-0" />
+                            <span className="truncate font-semibold">
+                              {lesson.groupId
+                                ? dict.academy.levels[getGroup(lesson.groupId)!.level]
+                                : dict.academy.form.levelTest}
+                            </span>
+                          </div>
+                        ) : booking ? (
                           <div className="flex items-start justify-between gap-2 rounded-lg bg-navy-50 px-3 py-2 dark:bg-navy-900/60">
                             <div className="min-w-0">
                               <p className="truncate font-semibold">{booking.userName}</p>
