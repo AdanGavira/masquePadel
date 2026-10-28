@@ -172,7 +172,7 @@ const es = {
     noAccount: "¿No tienes cuenta?",
     hasAccount: "¿Ya tienes cuenta?",
     demoTitle: "Cuentas de prueba",
-    demoText: "Modo demostración: los datos se guardan en local. Usa estas cuentas o crea la tuya.",
+    demoText: "Modo demostración: tus reservas se guardan solo en este navegador. Usa estas cuentas o crea la tuya.",
     demoPlayer: "Jugador",
     demoAdmin: "Administrador",
     useAccount: "Usar",

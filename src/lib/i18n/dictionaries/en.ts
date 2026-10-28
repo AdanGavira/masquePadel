@@ -173,7 +173,7 @@ const en: Dictionary = {
     noAccount: "Don't have an account?",
     hasAccount: "Already have an account?",
     demoTitle: "Test accounts",
-    demoText: "Demo mode: data is stored locally. Use these accounts or create your own.",
+    demoText: "Demo mode: your bookings are stored only in this browser. Use these accounts or create your own.",
     demoPlayer: "Player",
     demoAdmin: "Admin",
     useAccount: "Use",
