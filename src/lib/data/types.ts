@@ -36,13 +36,16 @@ export interface Occupied {
   mine: boolean;
 }
 
-export type AuthResult = { ok: true } | { ok: false; error: "invalid" | "exists" | "weak" | "unknown" };
+export type AuthError = "invalid" | "exists" | "weak" | "unconfirmed" | "unknown";
+
+/** `needsConfirmation`: cuenta creada, pero hay que confirmar el email antes de entrar. */
+export type AuthResult = { ok: true; needsConfirmation?: boolean } | { ok: false; error: AuthError };
 
 export type CreateBookingResult = { ok: true; booking: Booking } | { ok: false; error: "taken" };
 
 /**
  * Almacenamiento de datos. Hay dos implementaciones: una de demostración
- * (fichero JSON local, sin configuración) y otra con Supabase.
+ * (cookie firmada en el navegador, sin configuración) y otra con Supabase.
  * Las reglas de negocio están en `bookings.ts`, no aquí.
  */
 export interface Backend {

@@ -44,6 +44,7 @@ export function AuthForm({
         {next && <input type="hidden" name="next" value={next} />}
 
         {state?.error && <Alert>{dict.errors[state.error]}</Alert>}
+        {state?.notice === "confirm" && <Alert tone="success">{dict.confirmEmail}</Alert>}
 
         {mode === "register" && (
           <label className="block text-sm font-medium">
