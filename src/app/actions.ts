@@ -4,11 +4,11 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { bookSlot, cancelBooking, type BookError, type CancelError } from "@/lib/bookings";
-import { backend } from "@/lib/data";
+import { backend, type AuthError } from "@/lib/data";
 import { href, isLocale, type Locale } from "@/lib/i18n";
 import { isBookableDate, isValidCourt, isValidSlot } from "@/lib/slots";
 
-export type FormState = { error?: "invalid" | "exists" | "weak" | "unknown" | "fields" } | undefined;
+export type FormState = { error?: AuthError | "fields"; notice?: "confirm" } | undefined;
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -45,6 +45,7 @@ export async function registerAction(_: FormState, formData: FormData): Promise<
 
   const result = await backend.signUp(name, email, password);
   if (!result.ok) return { error: result.error };
+  if (result.needsConfirmation) return { notice: "confirm" };
   redirect(safeNext(locale, formData.get("next")));
 }
 

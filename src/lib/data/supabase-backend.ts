@@ -69,13 +69,15 @@ export const supabaseBackend: Backend = {
   async signIn(email, password) {
     const supabase = await client();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return error ? { ok: false, error: "invalid" } : { ok: true };
+    if (!error) return { ok: true };
+    return { ok: false, error: error.code === "email_not_confirmed" ? "unconfirmed" : "invalid" };
   },
 
   async signUp(name, email, password) {
     const supabase = await client();
-    const { error } = await supabase.auth.signUp({ email, password, options: { data: { name } } });
-    if (!error) return { ok: true };
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name } } });
+    // Sin sesión: el proyecto exige confirmar el email antes de entrar.
+    if (!error) return { ok: true, needsConfirmation: !data.session };
     if (error.code === "user_already_exists") return { ok: false, error: "exists" };
     if (error.code === "weak_password") return { ok: false, error: "weak" };
     return { ok: false, error: "unknown" };

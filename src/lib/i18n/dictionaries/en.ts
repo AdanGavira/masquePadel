@@ -177,10 +177,12 @@ const en: Dictionary = {
     demoPlayer: "Player",
     demoAdmin: "Admin",
     useAccount: "Use",
+    confirmEmail: "Account created! We've sent you an email: click the link to confirm it, then sign in.",
     errors: {
       invalid: "Wrong email or password.",
       exists: "An account with that email already exists.",
       weak: "Password must be at least 8 characters long.",
+      unconfirmed: "Please confirm your email before signing in: check your inbox.",
       unknown: "Something went wrong. Please try again.",
       fields: "Please check the form fields.",
     },

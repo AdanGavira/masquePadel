@@ -176,10 +176,12 @@ const es = {
     demoPlayer: "Jugador",
     demoAdmin: "Administrador",
     useAccount: "Usar",
+    confirmEmail: "¡Cuenta creada! Te hemos enviado un email: pulsa el enlace para confirmarla y después entra.",
     errors: {
       invalid: "Email o contraseña incorrectos.",
       exists: "Ya existe una cuenta con ese email.",
       weak: "La contraseña debe tener al menos 8 caracteres.",
+      unconfirmed: "Confirma tu email antes de entrar: revisa tu bandeja de entrada.",
       unknown: "Algo ha fallado. Inténtalo de nuevo.",
       fields: "Revisa los campos del formulario.",
     },
