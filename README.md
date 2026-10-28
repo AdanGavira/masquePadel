@@ -23,14 +23,14 @@ npm install
 npm run dev
 ```
 
-Abre http://localhost:3000. Sin configurar nada, la web funciona en **modo demostración**: los datos se guardan en `.data/demo-db.json` y ya trae reservas de ejemplo.
+Abre http://localhost:3000. Sin configurar nada, la web funciona en **modo demostración**: cada visitante tiene su propio club de prueba guardado en una cookie firmada de su navegador, con reservas de socios ficticios ya cargadas. Funciona igual en local y en Vercel sin base de datos.
 
 | Cuenta | Email | Contraseña |
 |---|---|---|
 | Jugador | `jugador@masquepadel.test` | `padel1234` |
 | Administrador | `admin@masquepadel.test` | `admin1234` |
 
-Para empezar de cero, borra la carpeta `.data/`.
+Para empezar de cero, borra las cookies del sitio.
 
 ## Pasar a Supabase
 
@@ -63,7 +63,7 @@ src/
   lib/club.ts          configuración del club
   lib/slots.ts         turnos y reglas de horario
   lib/bookings.ts      reglas de negocio de las reservas
-  lib/data/            almacenamiento: modo demo (JSON) y Supabase
+  lib/data/            almacenamiento: modo demo (cookie) y Supabase
   lib/i18n/            textos en español e inglés
 supabase/migrations/   esquema SQL
 legacy-java/           versión anterior de escritorio (Java Swing)
