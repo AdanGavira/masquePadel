@@ -61,7 +61,7 @@ export function AddToCart({
       )}
 
       {size !== null && (
-        <p className={cx("text-sm font-semibold", stock === 0 ? "text-fg-muted" : stock <= 2 ? "text-ball-600 dark:text-ball-400" : "text-emerald-700 dark:text-emerald-400")}>
+        <p className={cx("text-sm font-semibold", stock === 0 ? "text-fg-muted" : stock <= 2 ? "text-ball-700 dark:text-ball-400" : "text-emerald-700 dark:text-emerald-400")}>
           {stock === 0 ? dict.outOfStock : stock <= 2 ? dict.lowStock : dict.inStock}
         </p>
       )}

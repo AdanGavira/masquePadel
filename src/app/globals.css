@@ -20,6 +20,8 @@
   --color-ball-400: #ffd23f;
   --color-ball-500: #fbc02d;
   --color-ball-600: #e0a400;
+  /* Para texto amarillo sobre fondo claro (contraste AA). */
+  --color-ball-700: #855d00;
 
   --color-court-500: #2f6fd6;
 

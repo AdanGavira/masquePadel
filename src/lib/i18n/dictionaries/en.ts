@@ -104,6 +104,8 @@ const en: Dictionary = {
       text: "In a well-connected area of Seville, easy to reach by car and with free parking.",
       directions: "Get directions",
       mapTitle: "Map showing the masquePadel location",
+      loadMap: "Load map",
+      mapNotice: "Once loaded, Google may use cookies.",
     },
     faq: {
       title: "FAQ",
@@ -224,6 +226,11 @@ const en: Dictionary = {
     hoursText: "Every day, {open} – {close}",
     links: "Links",
     rights: "Portfolio project · fictional club.",
+    legal: "Legal",
+    legalNotice: "Legal notice",
+    privacy: "Privacy",
+    cookies: "Cookie policy",
+    skip: "Skip to content",
   },
   academy: {
     hero: {

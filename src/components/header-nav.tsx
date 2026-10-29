@@ -66,7 +66,7 @@ export function HeaderNav({
         <Link href={href(locale)} className="flex items-center gap-2.5 font-display text-lg font-extrabold tracking-tight">
           <Image src="/img/logo.png" alt="" width={36} height={36} className="rounded-full bg-white" priority />
           <span>
-            masque<span className="text-ball-600 dark:text-ball-400">Padel</span>
+            masque<span className="text-ball-700 dark:text-ball-400">Padel</span>
           </span>
         </Link>
 
@@ -83,7 +83,7 @@ export function HeaderNav({
             >
               {link.label}
               {link.soon && (
-                <span className="ml-1.5 hidden rounded-full bg-ball-400/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-ball-600 xl:inline dark:text-ball-400">
+                <span className="ml-1.5 hidden rounded-full bg-ball-400/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-ball-700 xl:inline dark:text-ball-400">
                   {dict.soon}
                 </span>
               )}
@@ -149,7 +149,7 @@ export function HeaderNav({
                 className="flex items-center justify-between border-b border-line py-3 font-medium"
               >
                 {link.label}
-                {link.soon && <span className="text-xs font-semibold uppercase text-ball-600">{dict.soon}</span>}
+                {link.soon && <span className="text-xs font-semibold uppercase text-ball-700">{dict.soon}</span>}
               </Link>
             ))}
           </nav>

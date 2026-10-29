@@ -22,9 +22,9 @@ const cellStyles: Record<CellState, string> = {
   booked: "border-line bg-bg-soft text-fg-muted",
   mine: "border-ball-500 bg-ball-400/25 text-navy-900 dark:text-ball-300",
   blocked: "border-line bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,var(--border)_6px,var(--border)_8px)] text-fg-muted",
-  tournament: "border-ball-500/40 bg-ball-400/10 text-ball-600 dark:text-ball-400",
+  tournament: "border-ball-500/40 bg-ball-400/10 text-ball-700 dark:text-ball-400",
   class: "border-navy-200 bg-navy-50 text-navy-700 dark:border-navy-800 dark:bg-navy-900/50 dark:text-navy-200",
-  past: "border-transparent bg-transparent text-fg-muted/60",
+  past: "border-transparent bg-transparent text-fg-muted",
 };
 
 export function BookingGrid({

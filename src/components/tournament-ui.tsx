@@ -8,7 +8,7 @@ import { cx } from "./ui";
 const statusStyles: Record<TournamentStatus, string> = {
   open: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200",
   closed: "bg-bg-soft text-fg-muted",
-  inPlay: "bg-ball-400/25 text-ball-600 dark:text-ball-300",
+  inPlay: "bg-ball-400/25 text-ball-700 dark:text-ball-300",
   finished: "bg-navy-50 text-navy-700 dark:bg-navy-900 dark:text-navy-100",
 };
 

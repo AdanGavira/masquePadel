@@ -113,7 +113,7 @@ export default async function AcademyPage({ params }: { params: Promise<{ locale
                     <p
                       className={cx(
                         "text-sm font-semibold",
-                        free === 0 ? "text-fg-muted" : free === 1 ? "text-ball-600 dark:text-ball-400" : "text-emerald-700 dark:text-emerald-400",
+                        free === 0 ? "text-fg-muted" : free === 1 ? "text-ball-700 dark:text-ball-400" : "text-emerald-700 dark:text-emerald-400",
                       )}
                     >
                       {free === 0 ? a.groups.full : free === 1 ? a.groups.lastSpot : t(a.groups.spots, { n: free })}
@@ -143,7 +143,7 @@ export default async function AcademyPage({ params }: { params: Promise<{ locale
                   </span>
                   <div>
                     <h3 className="font-display text-lg font-bold">{coach.name}</h3>
-                    <p className="text-sm font-semibold text-ball-600 dark:text-ball-400">{info.role}</p>
+                    <p className="text-sm font-semibold text-ball-700 dark:text-ball-400">{info.role}</p>
                     <p className="mt-2 text-fg-muted">{info.bio}</p>
                   </div>
                 </Card>

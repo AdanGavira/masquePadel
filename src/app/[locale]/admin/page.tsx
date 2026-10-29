@@ -117,7 +117,7 @@ export default async function AdminPage({
                     return (
                       <td key={id} className="px-3 py-2 align-top">
                         {tournament ? (
-                          <div className="flex items-center gap-2 rounded-lg border border-ball-500/40 px-3 py-2 text-ball-600 dark:text-ball-400">
+                          <div className="flex items-center gap-2 rounded-lg border border-ball-500/40 px-3 py-2 text-ball-700 dark:text-ball-400">
                             <Trophy className="size-4 shrink-0" />
                             <span className="truncate font-semibold">
                               {tournaments.find((t) => t.id === tournament.tournamentId)?.name}
