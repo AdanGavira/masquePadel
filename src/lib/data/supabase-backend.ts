@@ -1,5 +1,6 @@
 import "server-only";
 import { client } from "./supabase-client";
+import { supabaseShop } from "./supabase-shop";
 import { supabaseTournaments } from "./supabase-tournaments";
 import type { AcademyRequest, Backend, Booking, Role } from "./types";
 
@@ -76,6 +77,7 @@ const toAcademyRequest = (r: AcademyRow): AcademyRequest => ({
 export const supabaseBackend: Backend = {
   mode: "supabase",
   ...supabaseTournaments,
+  ...supabaseShop,
 
   async getCurrentUser() {
     const supabase = await client();

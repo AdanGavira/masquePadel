@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarCheck, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from "lucide-react";
+import { CalendarCheck, LayoutDashboard, LogOut, Menu, Moon, ShoppingCart, Sun, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { logoutAction, setLocaleCookie } from "@/app/actions";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { href, locales } from "@/lib/i18n/config";
+import { useCart } from "./cart-store";
 import { cx } from "./ui";
 
 interface NavLink {
@@ -39,7 +40,7 @@ export function HeaderNav({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isActive = (link: NavLink) => !link.soon && pathname === link.href;
+  const isActive = (link: NavLink) => !link.soon && (pathname === link.href || pathname.startsWith(`${link.href}/`));
   const switchTo = locales.find((l) => l !== locale)!;
   const switchPath = pathname.replace(new RegExp(`^/${locale}(?=/|$)`), `/${switchTo}`);
 
@@ -100,6 +101,7 @@ export function HeaderNav({
           >
             {switchTo}
           </Link>
+          <CartButton href={href(locale, "/tienda/carrito")} label={dict.cart} className={iconButton} />
           <button type="button" onClick={toggleTheme} aria-label={dict.theme} className={iconButton}>
             <Sun className="hidden size-[18px] dark:block" />
             <Moon className="size-[18px] dark:hidden" />
@@ -206,5 +208,19 @@ function UserLinks({
         </button>
       </form>
     </>
+  );
+}
+
+function CartButton({ href: to, label, className }: { href: string; label: string; className: string }) {
+  const count = useCart().reduce((sum, l) => sum + l.quantity, 0);
+  return (
+    <Link href={to} aria-label={count ? `${label} (${count})` : label} className={cx(className, "relative")}>
+      <ShoppingCart className="size-[18px]" />
+      {count > 0 && (
+        <span className="absolute right-0.5 top-0.5 inline-flex min-w-4 items-center justify-center rounded-full bg-ball-500 px-1 text-[10px] font-bold leading-4 text-navy-950">
+          {count}
+        </span>
+      )}
+    </Link>
   );
 }

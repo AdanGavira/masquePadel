@@ -179,21 +179,21 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </Container>
       </section>
 
-      {/* Próximamente */}
-      <section id="proximamente" className="scroll-mt-20 pb-20 sm:pb-28">
+      {/* Tienda */}
+      <section className="pb-20 sm:pb-28">
         <Container>
-          {home.soon.items.map((item) => (
-            <Card key={item.title} className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-              <ShoppingBag className="size-8 shrink-0 text-ball-500" />
-              <div className="flex-1">
-                <h3 className="font-display text-xl font-bold">{item.title}</h3>
-                <p className="mt-1 text-fg-muted">{item.text}</p>
-              </div>
-              <span className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-fg-muted">
-                {home.soon.badge}
-              </span>
-            </Card>
-          ))}
+          <Card className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+            <span className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl bg-ball-400/20 text-ball-600 dark:text-ball-400">
+              <ShoppingBag className="size-7" />
+            </span>
+            <div className="flex-1">
+              <h2 className="font-display text-2xl font-extrabold tracking-tight">{home.shopPromo.title}</h2>
+              <p className="mt-1 text-fg-muted">{home.shopPromo.text}</p>
+            </div>
+            <ButtonLink href={href(locale, "/tienda")} variant="secondary" className="shrink-0">
+              {home.shopPromo.cta} <ArrowRight className="size-4" />
+            </ButtonLink>
+          </Card>
         </Container>
       </section>
 

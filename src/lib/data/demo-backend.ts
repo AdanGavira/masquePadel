@@ -6,6 +6,7 @@ import { COURTS } from "../club";
 import { getSlots } from "../slots";
 import { todayKey, type DateKey } from "../time";
 import { COOKIE_DAYS, cookieOptions, decode, encode, stableRandom } from "./demo-cookies";
+import { demoShop } from "./demo-shop";
 import { demoTournaments } from "./demo-tournaments";
 import type { AcademyRequest, AcademyUpdate, Backend, Block, Booking, Role, User } from "./types";
 
@@ -261,6 +262,7 @@ const sameSlot = (a: { courtId: number; slot: string }, b: { courtId: number; sl
 export const demoBackend: Backend = {
   mode: "demo",
   ...demoTournaments,
+  ...demoShop,
 
   async getCurrentUser() {
     const uid = await sessionUserId();

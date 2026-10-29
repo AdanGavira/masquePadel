@@ -13,7 +13,7 @@ export async function Header({ locale }: { locale: Locale }) {
       user={user ? { name: user.name, isAdmin: user.role === "admin" } : null}
       links={[
         { href: href(locale, "/reservas"), label: dict.nav.booking },
-        { href: `${href(locale)}#proximamente`, label: dict.nav.shop, soon: true },
+        { href: href(locale, "/tienda"), label: dict.nav.shop },
         { href: href(locale, "/torneos"), label: dict.nav.tournaments },
         { href: href(locale, "/academia"), label: dict.nav.academy },
       ]}

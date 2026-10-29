@@ -1,8 +1,11 @@
-import { CalendarDays, Clock, GraduationCap, Trophy } from "lucide-react";
+import { CalendarDays, Clock, GraduationCap, ShoppingBag, Trophy } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { cancelOrderAction } from "@/app/actions";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
+import { ConfirmSubmit } from "@/components/confirm-submit";
+import { OrderStatusBadge } from "@/components/order-status-badge";
 import { ButtonLink, Container, cx } from "@/components/ui";
 import { getGroup } from "@/lib/academy";
 import { groupName } from "@/lib/academy-format";
@@ -10,6 +13,7 @@ import { isUpcoming } from "@/lib/bookings";
 import { CLUB } from "@/lib/club";
 import { backend, type Booking } from "@/lib/data";
 import { formatDate, getDictionary, href, isLocale, t, type Dictionary, type Locale } from "@/lib/i18n";
+import { canCancelOrder, formatPrice } from "@/lib/shop";
 import { canCancel, slotEnd } from "@/lib/slots";
 import { clubNowParts, clubTimeToDate, todayKey } from "@/lib/time";
 
@@ -28,11 +32,12 @@ export default async function MyBookingsPage({ params }: { params: Promise<{ loc
   const user = await backend.getCurrentUser();
   if (!user) redirect(`${href(locale, "/acceso")}?next=${encodeURIComponent(href(locale, "/mis-reservas"))}`);
 
-  const [all, academy, registrations, tournaments] = await Promise.all([
+  const [all, academy, registrations, tournaments, orders] = await Promise.all([
     backend.listUserBookings(user.id),
     backend.listUserAcademyRequests(user.id),
     backend.listUserRegistrations(user.id, user.email),
     backend.listTournaments(),
+    backend.listUserOrders(user.id),
   ]);
   const entries = registrations
     .filter((r) => r.status === "confirmed")
@@ -67,6 +72,64 @@ export default async function MyBookingsPage({ params }: { params: Promise<{ loc
           <ul className="space-y-3">
             {upcoming.map((b) => (
               <BookingItem key={b.id} booking={b} locale={locale} dict={dict} />
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-12">
+        <h2 className="mb-4 font-display text-xl font-bold">{dict.shop.orders.title}</h2>
+        {orders.length === 0 ? (
+          <div className="flex flex-col items-start gap-4 rounded-2xl border border-line bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex items-center gap-3 text-fg-muted">
+              <ShoppingBag className="size-6 shrink-0 text-ball-500" /> {dict.shop.orders.empty}
+            </p>
+            <ButtonLink href={href(locale, "/tienda")} variant="ghost" className="shrink-0">
+              {dict.shop.orders.cta}
+            </ButtonLink>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {orders.map((o) => (
+              <li key={o.id} className="rounded-2xl border border-line bg-card p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <ShoppingBag className="size-6 shrink-0 text-ball-500" />
+                    <div>
+                      <p className="font-display text-lg font-bold">{t(dict.shop.orders.code, { code: o.code })}</p>
+                      <p className="text-sm text-fg-muted">{formatDate(locale, o.createdAt.slice(0, 10))}</p>
+                    </div>
+                  </div>
+                  <OrderStatusBadge status={o.status} label={dict.shop.orders.status[o.status]} />
+                </div>
+                <ul className="mt-3 space-y-1 text-sm">
+                  {o.items.map((item) => (
+                    <li key={`${item.productId}-${item.size}`} className="flex justify-between gap-3">
+                      <span>
+                        {item.quantity} × {item.name}
+                        {item.size && <span className="text-fg-muted"> · {item.size}</span>}
+                      </span>
+                      <span className="tabular-nums">{formatPrice(locale, item.unitPrice * item.quantity)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+                  <span className="font-semibold">
+                    {dict.shop.cart.total}: {formatPrice(locale, o.total)}
+                  </span>
+                  {canCancelOrder(o) && (
+                    <form action={cancelOrderAction}>
+                      <input type="hidden" name="orderId" value={o.id} />
+                      <ConfirmSubmit
+                        message={dict.shop.orders.confirmCancel}
+                        className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-fg-muted hover:text-red-600"
+                      >
+                        {dict.shop.orders.cancel}
+                      </ConfirmSubmit>
+                    </form>
+                  )}
+                </div>
+              </li>
             ))}
           </ul>
         )}

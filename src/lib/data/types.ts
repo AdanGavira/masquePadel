@@ -1,4 +1,5 @@
 import type { Level } from "../academy";
+import type { CartLine, Order, OrderStatus, Product } from "../shop";
 import type { Category, MatchResult, Pair, Tournament } from "../tournaments";
 import type { DateKey } from "../time";
 
@@ -89,6 +90,12 @@ export interface NewRegistration {
   player2Email: string;
 }
 
+export type ProductInput = Omit<Product, "id">;
+
+export type PlaceOrderResult =
+  | { ok: true; order: Order }
+  | { ok: false; error: "empty" | "invalid" | "stock"; productId?: string };
+
 export type AuthError = "invalid" | "exists" | "weak" | "unconfirmed" | "unknown";
 
 /** `needsConfirmation`: cuenta creada, pero hay que confirmar el email antes de entrar. */
@@ -145,4 +152,16 @@ export interface Backend {
   generateBracket(tournamentId: string, seeds: { id: string; seed: number }[]): Promise<void>;
   listResults(tournamentId?: string): Promise<MatchResult[]>;
   setResult(result: MatchResult): Promise<void>;
+
+  /** Todo el catálogo, también los productos desactivados. */
+  listProducts(): Promise<Product[]>;
+  getProduct(id: string): Promise<Product | null>;
+  saveProduct(input: ProductInput, id?: string): Promise<Product>;
+  /** Comprueba stock y precios, descuenta el stock y crea el pedido de una vez. */
+  placeOrder(user: User, lines: CartLine[]): Promise<PlaceOrderResult>;
+  listUserOrders(userId: string): Promise<Order[]>;
+  listOrders(): Promise<Order[]>;
+  getOrder(id: string): Promise<Order | null>;
+  /** Al cancelar se devuelve el stock. */
+  updateOrderStatus(id: string, status: OrderStatus): Promise<void>;
 }

@@ -23,6 +23,7 @@ import {
   type ResultError,
 } from "@/lib/tournament-service";
 import { href, isLocale, type Locale } from "@/lib/i18n";
+import { cancelOrder, checkout, saveProduct, setOrderStatus, type ProductFormError } from "@/lib/shop-service";
 import { isBookableDate, isValidCourt, isValidSlot } from "@/lib/slots";
 
 export type FormState = { error?: AuthError | "fields"; notice?: "confirm" } | undefined;
@@ -171,6 +172,35 @@ export type ResultState = { ok: true } | { ok: false; error: ResultError } | und
 
 export async function setResultAction(_: ResultState, formData: FormData): Promise<ResultState> {
   const result = await setResult(await backend.getCurrentUser(), formData);
+  if (result.ok) revalidatePath("/[locale]", "layout");
+  return result;
+}
+
+export type CheckoutState =
+  | { ok: true; orderId: string; code: string }
+  | { ok: false; error: "auth" | "empty" | "invalid" | "stock"; productId?: string };
+
+export async function checkoutAction(lines: unknown): Promise<CheckoutState> {
+  const result = await checkout(await backend.getCurrentUser(), lines);
+  if (!result.ok) return result;
+  revalidatePath("/[locale]", "layout");
+  return { ok: true, orderId: result.order.id, code: result.order.code };
+}
+
+export async function cancelOrderAction(formData: FormData) {
+  await cancelOrder(await backend.getCurrentUser(), String(formData.get("orderId")));
+  revalidatePath("/[locale]", "layout");
+}
+
+export async function setOrderStatusAction(formData: FormData) {
+  await setOrderStatus(await backend.getCurrentUser(), String(formData.get("orderId")), String(formData.get("status")));
+  revalidatePath("/[locale]", "layout");
+}
+
+export type ProductFormState = { ok: true; id: string } | { ok: false; error: ProductFormError } | undefined;
+
+export async function saveProductAction(_: ProductFormState, formData: FormData): Promise<ProductFormState> {
+  const result = await saveProduct(await backend.getCurrentUser(), formData);
   if (result.ok) revalidatePath("/[locale]", "layout");
   return result;
 }
