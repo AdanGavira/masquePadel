@@ -66,36 +66,32 @@ export default async function TournamentPage({
         <aside className={cx("grid gap-5", x.bracketGenerated ? "md:grid-cols-2" : "content-start")}>
           <Card>
             <dl className="space-y-4 text-sm">
-              <div className="flex gap-3">
-                <CalendarDays className="mt-0.5 size-4 text-fg-muted" />
-                <div>
-                  <dt className="text-fg-muted">{tt.detail.date}</dt>
-                  <dd className="font-semibold first-letter:uppercase">
-                    {formatDate(locale, x.date, { weekday: "long", month: "long", year: "numeric" })}
-                  </dd>
-                </div>
+              <div className="flex flex-col gap-0.5">
+                <dt className="flex items-center gap-2 text-fg-muted">
+                  <CalendarDays className="size-4" aria-hidden /> {tt.detail.date}
+                </dt>
+                <dd className="font-semibold first-letter:uppercase">
+                  {formatDate(locale, x.date, { weekday: "long", month: "long", year: "numeric" })}
+                </dd>
               </div>
-              <div className="flex gap-3">
-                <Clock className="mt-0.5 size-4 text-fg-muted" />
-                <div>
-                  <dt className="text-fg-muted">{tt.detail.schedule}</dt>
-                  <dd className="font-semibold">{t(tt.courts, { start: x.startSlot, end: slotEnd(x.endSlot) })}</dd>
-                </div>
+              <div className="flex flex-col gap-0.5">
+                <dt className="flex items-center gap-2 text-fg-muted">
+                  <Clock className="size-4" aria-hidden /> {tt.detail.schedule}
+                </dt>
+                <dd className="font-semibold">{t(tt.courts, { start: x.startSlot, end: slotEnd(x.endSlot) })}</dd>
               </div>
-              <div className="flex gap-3">
-                <Wallet className="mt-0.5 size-4 text-fg-muted" />
-                <div>
-                  <dt className="text-fg-muted">{tt.detail.price}</dt>
-                  <dd className="font-semibold">{t(tt.pricePair, { price: euros(locale, x.pricePerPair) })}</dd>
-                  <dd className="text-xs text-fg-muted">{tt.detail.payAtClub}</dd>
-                </div>
+              <div className="flex flex-col gap-0.5">
+                <dt className="flex items-center gap-2 text-fg-muted">
+                  <Wallet className="size-4" aria-hidden /> {tt.detail.price}
+                </dt>
+                <dd className="font-semibold">{t(tt.pricePair, { price: euros(locale, x.pricePerPair) })}</dd>
+                <dd className="text-xs text-fg-muted">{tt.detail.payAtClub}</dd>
               </div>
-              <div className="flex gap-3">
-                <Trophy className="mt-0.5 size-4 text-fg-muted" />
-                <div>
-                  <dt className="text-fg-muted">{tt.detail.format}</dt>
-                  <dd>{tt.detail.formatText}</dd>
-                </div>
+              <div className="flex flex-col gap-0.5">
+                <dt className="flex items-center gap-2 text-fg-muted">
+                  <Trophy className="size-4" aria-hidden /> {tt.detail.format}
+                </dt>
+                <dd>{tt.detail.formatText}</dd>
               </div>
             </dl>
           </Card>

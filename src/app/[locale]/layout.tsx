@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { getDictionary, isLocale } from "@/lib/i18n";
+import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -14,14 +15,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!isLocale(locale)) return {};
   const dict = getDictionary(locale);
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+    metadataBase: new URL(SITE_URL),
     title: { default: dict.meta.title, template: `%s · masquePadel` },
     description: dict.meta.description,
     alternates: { languages: { es: "/es", en: "/en" } },
     openGraph: {
       title: dict.meta.title,
       description: dict.meta.description,
-      images: ["/img/hero.jpg"],
       locale: locale === "es" ? "es_ES" : "en_GB",
       type: "website",
     },
@@ -54,8 +54,16 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${inter.variable} ${jakarta.variable} flex min-h-dvh flex-col font-sans antialiased`}>
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ball-500 focus:px-4 focus:py-2 focus:font-semibold focus:text-navy-950"
+        >
+          {getDictionary(locale).footer.skip}
+        </a>
         <Header locale={locale} />
-        <main className="flex-1">{children}</main>
+        <main id="contenido" className="flex-1">
+          {children}
+        </main>
         <Footer locale={locale} />
       </body>
     </html>

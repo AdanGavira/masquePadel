@@ -103,6 +103,8 @@ const es = {
       text: "En una zona bien comunicada de Sevilla, con fácil acceso en coche y aparcamiento gratuito.",
       directions: "Cómo llegar",
       mapTitle: "Mapa de la ubicación de masquePadel",
+      loadMap: "Cargar mapa",
+      mapNotice: "Al cargarlo, Google puede usar cookies.",
     },
     faq: {
       title: "Preguntas frecuentes",
@@ -223,6 +225,11 @@ const es = {
     hoursText: "Todos los días, {open} – {close}",
     links: "Enlaces",
     rights: "Proyecto de portfolio · club ficticio.",
+    legal: "Legal",
+    legalNotice: "Aviso legal",
+    privacy: "Privacidad",
+    cookies: "Política de cookies",
+    skip: "Saltar al contenido",
   },
   academy: {
     hero: {

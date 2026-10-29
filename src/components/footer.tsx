@@ -76,9 +76,21 @@ export function Footer({ locale }: { locale: Locale }) {
         </div>
       </Container>
       <div className="border-t border-white/10">
-        <Container className="flex flex-col gap-2 py-6 text-xs text-navy-300 sm:flex-row sm:justify-between">
-          <span>© {new Date().getFullYear()} masquePadel</span>
-          <span>{dict.footer.rights}</span>
+        <Container className="flex flex-col gap-3 py-6 text-xs text-navy-300 sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} masquePadel · {dict.footer.rights}</span>
+          <nav aria-label={dict.footer.legal} className="flex flex-wrap gap-x-4 gap-y-1">
+            {(
+              [
+                ["aviso-legal", dict.footer.legalNotice],
+                ["privacidad", dict.footer.privacy],
+                ["cookies", dict.footer.cookies],
+              ] as const
+            ).map(([doc, label]) => (
+              <Link key={doc} href={href(locale, `/legal/${doc}`)} className="hover:text-white">
+                {label}
+              </Link>
+            ))}
+          </nav>
         </Container>
       </div>
     </footer>

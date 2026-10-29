@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { MapEmbed } from "@/components/map-embed";
 import { ButtonLink, Card, Container, SectionHeading } from "@/components/ui";
 import { CLUB, COURTS, PRICE_PER_PLAYER } from "@/lib/club";
 import { getDictionary, href, isLocale, t } from "@/lib/i18n";
+import { SITE_URL } from "@/lib/site";
 import { getSlots, slotEnd } from "@/lib/slots";
 
 const featureIcons = [Sparkles, Lightbulb, Smartphone, ShowerHead, Car, Coffee];
@@ -28,8 +30,35 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const home = dict.home;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(CLUB.address.mapsQuery)}`;
 
+  // Datos estructurados para que los buscadores entiendan qué es el club.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsActivityLocation",
+    name: "masquePadel",
+    description: dict.meta.description,
+    url: `${SITE_URL}/${locale}`,
+    image: `${SITE_URL}/img/hero.jpg`,
+    email: CLUB.contact.email,
+    telephone: CLUB.contact.phone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: CLUB.address.street,
+      postalCode: CLUB.address.postalCode,
+      addressLocality: CLUB.address.city,
+      addressCountry: "ES",
+    },
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      opens: CLUB.opensAt,
+      closes: CLUB.closesAt,
+    },
+    priceRange: `${CLUB.pricePerCourt} €`,
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Portada */}
       <section className="relative isolate overflow-hidden bg-navy-950 text-white">
         <Image src="/img/hero.jpg" alt="" fill priority sizes="100vw" className="-z-20 object-cover opacity-60" />
@@ -99,7 +128,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <div className="p-5">
                   <div className="flex items-center justify-between">
                     <h3 className="font-display text-lg font-bold">{t(dict.booking.court, { n: court.id })}</h3>
-                    <span className="rounded-full bg-ball-400/20 px-2.5 py-0.5 text-xs font-semibold text-ball-600 dark:text-ball-400">
+                    <span className="rounded-full bg-ball-400/20 px-2.5 py-0.5 text-xs font-semibold text-ball-700 dark:text-ball-400">
                       {court.kind === "panoramic" ? home.courts.panoramic : home.courts.glass}
                     </span>
                   </div>
@@ -183,7 +212,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <section className="pb-20 sm:pb-28">
         <Container>
           <Card className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-            <span className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl bg-ball-400/20 text-ball-600 dark:text-ball-400">
+            <span className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl bg-ball-400/20 text-ball-700 dark:text-ball-400">
               <ShoppingBag className="size-7" />
             </span>
             <div className="flex-1">
@@ -215,12 +244,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </ButtonLink>
           </div>
           <div className="overflow-hidden rounded-3xl border border-line lg:col-span-3">
-            <iframe
+            <MapEmbed
+              query={CLUB.address.mapsQuery}
               title={home.location.mapTitle}
-              src={`https://www.google.com/maps?q=${encodeURIComponent(CLUB.address.mapsQuery)}&output=embed`}
-              className="h-80 w-full sm:h-96"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
+              loadLabel={home.location.loadMap}
+              notice={home.location.mapNotice}
+              cookiesHref={href(locale, "/legal/cookies")}
+              cookiesLabel={dict.footer.cookies}
             />
           </div>
         </Container>
