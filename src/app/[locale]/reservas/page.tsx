@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BookingGrid, type CellState } from "@/components/booking-grid";
 import { academyCells } from "@/lib/academy";
+import { tournamentCells } from "@/lib/tournaments";
 import { DateStrip } from "@/components/date-strip";
 import { Container } from "@/components/ui";
 import { CLUB, COURTS, PRICE_PER_PLAYER } from "@/lib/club";
@@ -31,6 +32,7 @@ export default async function BookingPage({
   const user = await backend.getCurrentUser();
   const occupied = await backend.getOccupied(date, user?.id ?? null);
   const classes = academyCells(date);
+  const tournamentDay = tournamentCells(await backend.listTournaments(), date);
 
   const rows = getSlots().map((slot) => {
     const started = hasSlotStarted(date, slot);
@@ -40,7 +42,8 @@ export default async function BookingPage({
       cells: COURTS.map(({ id }) => {
         const hit = occupied.find((o) => o.courtId === id && o.slot === slot);
         let state: CellState = "free";
-        if (classes.some((c) => c.courtId === id && c.slot === slot)) state = "class";
+        if (tournamentDay.some((c) => c.courtId === id && c.slot === slot)) state = "tournament";
+        else if (classes.some((c) => c.courtId === id && c.slot === slot)) state = "class";
         else if (hit?.mine) state = "mine";
         else if (hit) state = hit.kind;
         else if (started) state = "past";

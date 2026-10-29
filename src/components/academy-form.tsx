@@ -2,12 +2,13 @@
 
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { academyRequestAction, type AcademyFormState } from "@/app/actions";
 import { MAX_NOTES } from "@/lib/academy";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { Alert, Button, Card, cx } from "./ui";
+import { useFormAction } from "./use-form-action";
 
 const input =
   "mt-1.5 block w-full rounded-xl border border-line bg-bg px-4 py-3 text-fg outline-none transition-colors focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20";
@@ -39,7 +40,7 @@ export function AcademyForm({
   myBookingsLabel: string;
   tests: { value: string; label: string; free: number }[];
 }) {
-  const [state, action, pending] = useActionState<AcademyFormState, FormData>(academyRequestAction, undefined);
+  const [state, onSubmit, pending] = useFormAction<AcademyFormState>(academyRequestAction);
   const [forWhom, setForWhom] = useState<"adult" | "child">("adult");
   const [formKey, setFormKey] = useState(0);
   const [dismissed, setDismissed] = useState<AcademyFormState>(undefined);
@@ -79,7 +80,7 @@ export function AcademyForm({
 
   return (
     <Card>
-      <form key={formKey} action={action} className="space-y-6">
+      <form key={formKey} onSubmit={onSubmit} className="space-y-6">
         <input type="hidden" name="locale" value={locale} />
         {error && <Alert>{error}</Alert>}
         <Alert tone="info">

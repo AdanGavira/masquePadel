@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarCheck, Check, Clock, GraduationCap, Lock, LogIn, Minus, Plus, Wallet, X } from "lucide-react";
+import { CalendarCheck, Check, Clock, GraduationCap, Lock, LogIn, Minus, Plus, Trophy, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -9,7 +9,7 @@ import type { Dictionary, Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { Alert, Button, ButtonLink, cx } from "./ui";
 
-export type CellState = "free" | "booked" | "mine" | "blocked" | "class" | "past";
+export type CellState = "free" | "booked" | "mine" | "blocked" | "class" | "tournament" | "past";
 
 interface Row {
   slot: string;
@@ -22,6 +22,7 @@ const cellStyles: Record<CellState, string> = {
   booked: "border-line bg-bg-soft text-fg-muted",
   mine: "border-ball-500 bg-ball-400/25 text-navy-900 dark:text-ball-300",
   blocked: "border-line bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,var(--border)_6px,var(--border)_8px)] text-fg-muted",
+  tournament: "border-ball-500/40 bg-ball-400/10 text-ball-600 dark:text-ball-400",
   class: "border-navy-200 bg-navy-50 text-navy-700 dark:border-navy-800 dark:bg-navy-900/50 dark:text-navy-200",
   past: "border-transparent bg-transparent text-fg-muted/60",
 };
@@ -84,7 +85,7 @@ export function BookingGrid({
   };
 
   const fmt = (n: number) => (locale === "es" ? `${n} €` : `€${n}`);
-  const legend: CellState[] = ["free", "booked", "mine", "class", "blocked"];
+  const legend: CellState[] = ["free", "booked", "mine", "class", "tournament", "blocked"];
 
   return (
     <div>
@@ -149,6 +150,7 @@ export function BookingGrid({
                       {cell.state === "mine" && <Check className="size-4" />}
                       {cell.state === "blocked" && <Lock className="size-3.5" />}
                       {cell.state === "class" && <GraduationCap className="size-4" />}
+                      {cell.state === "tournament" && <Trophy className="size-4" />}
                       <span className="hidden sm:inline">{dict.legend[cell.state]}</span>
                     </>
                   );

@@ -1,4 +1,5 @@
-import { CalendarDays, Clock, GraduationCap } from "lucide-react";
+import { CalendarDays, Clock, GraduationCap, Trophy } from "lucide-react";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
@@ -27,10 +28,17 @@ export default async function MyBookingsPage({ params }: { params: Promise<{ loc
   const user = await backend.getCurrentUser();
   if (!user) redirect(`${href(locale, "/acceso")}?next=${encodeURIComponent(href(locale, "/mis-reservas"))}`);
 
-  const [all, academy] = await Promise.all([
+  const [all, academy, registrations, tournaments] = await Promise.all([
     backend.listUserBookings(user.id),
     backend.listUserAcademyRequests(user.id),
+    backend.listUserRegistrations(user.id, user.email),
+    backend.listTournaments(),
   ]);
+  const entries = registrations
+    .filter((r) => r.status === "confirmed")
+    .map((r) => ({ registration: r, tournament: tournaments.find((x) => x.id === r.tournamentId) }))
+    .filter((e) => e.tournament)
+    .sort((x, y) => y.tournament!.date.localeCompare(x.tournament!.date));
   const upcoming = all.filter((b) => isUpcoming(b)).sort(byStart);
   const history = all
     .filter((b) => !isUpcoming(b))
@@ -60,6 +68,43 @@ export default async function MyBookingsPage({ params }: { params: Promise<{ loc
             {upcoming.map((b) => (
               <BookingItem key={b.id} booking={b} locale={locale} dict={dict} />
             ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-12">
+        <h2 className="mb-4 font-display text-xl font-bold">{dict.tournaments.mine.title}</h2>
+        {entries.length === 0 ? (
+          <div className="flex flex-col items-start gap-4 rounded-2xl border border-line bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex items-center gap-3 text-fg-muted">
+              <Trophy className="size-6 shrink-0 text-ball-500" /> {dict.tournaments.mine.empty}
+            </p>
+            <ButtonLink href={href(locale, "/torneos")} variant="ghost" className="shrink-0">
+              {dict.tournaments.mine.cta}
+            </ButtonLink>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {entries.map(({ registration: r, tournament: x }) => {
+              const partner = r.userId === user.id ? r.player2Name : r.player1Name;
+              return (
+                <li key={r.id}>
+                  <Link
+                    href={href(locale, `/torneos/${x!.id}`)}
+                    className="flex items-start gap-4 rounded-2xl border border-line bg-card p-5 transition-colors hover:border-navy-300"
+                  >
+                    <Trophy className="mt-0.5 size-6 shrink-0 text-ball-500" />
+                    <div>
+                      <p className="font-display text-lg font-bold">{x!.name}</p>
+                      <p className="mt-1 text-sm text-fg-muted">
+                        <span className="first-letter:uppercase">{formatDate(locale, x!.date, { weekday: "long", month: "long" })}</span>{" "}
+                        · {dict.tournaments.categories[r.category]} · {t(dict.tournaments.mine.partner, { name: partner })}
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
